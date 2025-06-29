@@ -116,6 +116,12 @@ if (!empty($logid)) {
     if (empty($logs)) {
         echo $OUTPUT->notification(get_string('nologs', 'local_webhooks'), 'info');
     } else {
+        // Show info about logs displayed
+        $totalcount = count($logs);
+        if ($totalcount >= 50) {
+            echo $OUTPUT->notification(get_string('showingrecent50', 'local_webhooks'), 'info');
+        }
+        
         foreach ($logs as $log) {
             $detailsurl = new moodle_url('/local/webhooks/logs.php', array('logid' => $log->id));
             $detailslink = html_writer::link($detailsurl, get_string('details', 'moodle'));

@@ -272,17 +272,28 @@ function local_webhooks_send_request($event, $callback) {
     $success = 0;
     
     if ($response) {
-        $responsebody = json_encode($response);
+        // Handle different response types
+        if (is_array($response)) {
+            $responsebody = json_encode($response);
+        } else if (is_string($response)) {
+            $responsebody = $response;
+        } else {
+            $responsebody = (string)$response;
+        }
         
         // Extract HTTP status code
-        if (isset($response['HTTP/1.1'])) {
+        if (is_array($response) && isset($response['HTTP/1.1'])) {
             $statusline = $response['HTTP/1.1'];
-            if (preg_match('/^(\d{3})/', $statusline, $matches)) {
+            if (preg_match('/HTTP\/\d\.\d\s+(\d{3})/', $statusline, $matches)) {
                 $responsecode = intval($matches[1]);
                 $success = ($responsecode >= 200 && $responsecode < 300) ? 1 : 0;
             }
         } else if (is_array($response) && !empty($response)) {
             // If we got a response but no HTTP status, assume success
+            $success = 1;
+            $responsecode = 200;
+        } else if (is_string($response) && !empty($response)) {
+            // If we got a string response, assume success
             $success = 1;
             $responsecode = 200;
         }

@@ -37,3 +37,4 @@ $string["responsebody"] = "Response Body";
 $string["service"] = "Service";
 $string["nologs"] = "No webhook logs found";
 $string["lognotfound"] = "Log entry not found";
+$string["showingrecent50"] = "Showing the 50 most recent webhook logs";
