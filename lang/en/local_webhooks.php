@@ -23,3 +23,17 @@
  */
 
 $string["pluginname"] = "WebHooks";
+
+// Webhook logs strings
+$string["webhooklogs"] = "WebHook Logs";
+$string["webhooklogdetails"] = "WebHook Log Details";
+$string["backtowebhooklogs"] = "Back to WebHook Logs";
+$string["backtowebhooks"] = "Back to WebHooks";
+$string["eventname"] = "Event Name";
+$string["timesent"] = "Time Sent";
+$string["responsecode"] = "Response Code";
+$string["requestbody"] = "Request Body";
+$string["responsebody"] = "Response Body";
+$string["service"] = "Service";
+$string["nologs"] = "No webhook logs found";
+$string["lognotfound"] = "Log entry not found";

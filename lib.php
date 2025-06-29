@@ -258,11 +258,120 @@ function local_webhooks_send_request($event, $callback) {
 
     $curl = new curl();
     $curl->setHeader(array("Content-Type: application/" . $callback->type));
-    $curl->post($callback->url, json_encode($event));
+    
+    $requestbody = json_encode($event);
+    $timesent = time();
+    
+    // Send the request
+    $curl->post($callback->url, $requestbody);
     $response = $curl->getResponse();
+    
+    // Parse response for logging
+    $responsecode = null;
+    $responsebody = '';
+    $success = 0;
+    
+    if ($response) {
+        $responsebody = json_encode($response);
+        
+        // Extract HTTP status code
+        if (isset($response['HTTP/1.1'])) {
+            $statusline = $response['HTTP/1.1'];
+            if (preg_match('/^(\d{3})/', $statusline, $matches)) {
+                $responsecode = intval($matches[1]);
+                $success = ($responsecode >= 200 && $responsecode < 300) ? 1 : 0;
+            }
+        } else if (is_array($response) && !empty($response)) {
+            // If we got a response but no HTTP status, assume success
+            $success = 1;
+            $responsecode = 200;
+        }
+    }
+    
+    // Log the webhook request
+    local_webhooks_log_request($callback->id, $event['eventname'] ?? 'unknown', $callback->url, 
+                               $requestbody, $responsecode, $responsebody, $success, $timesent);
 
     /* Event notification */
     local_webhooks_events::response_answer($callback->id, $response);
 
     return $response;
+}
+
+/**
+ * Log a webhook request to the database.
+ *
+ * @param  int    $serviceid
+ * @param  string $eventname
+ * @param  string $url
+ * @param  string $requestbody
+ * @param  int    $responsecode
+ * @param  string $responsebody
+ * @param  int    $success
+ * @param  int    $timesent
+ * @return boolean
+ */
+function local_webhooks_log_request($serviceid, $eventname, $url, $requestbody, $responsecode, $responsebody, $success, $timesent) {
+    global $DB;
+
+    $record = new stdClass();
+    $record->serviceid = $serviceid;
+    $record->eventname = $eventname;
+    $record->url = $url;
+    $record->requestbody = $requestbody;
+    $record->responsecode = $responsecode;
+    $record->responsebody = $responsebody;
+    $record->success = $success;
+    $record->timesent = $timesent;
+
+    return $DB->insert_record('local_webhooks_log', $record);
+}
+
+/**
+ * Get webhook logs with optional filtering.
+ *
+ * @param  int    $serviceid  Optional service ID filter
+ * @param  int    $limit      Optional limit
+ * @param  int    $offset     Optional offset
+ * @return array
+ */
+function local_webhooks_get_logs($serviceid = null, $limit = 0, $offset = 0) {
+    global $DB;
+
+    $params = array();
+    $where = '1=1';
+    
+    if ($serviceid) {
+        $where .= ' AND serviceid = ?';
+        $params[] = $serviceid;
+    }
+    
+    $sql = "SELECT l.*, s.title as servicetitle 
+            FROM {local_webhooks_log} l 
+            LEFT JOIN {local_webhooks_service} s ON l.serviceid = s.id 
+            WHERE $where 
+            ORDER BY l.timesent DESC";
+    
+    if ($limit > 0) {
+        return $DB->get_records_sql($sql, $params, $offset, $limit);
+    } else {
+        return $DB->get_records_sql($sql, $params);
+    }
+}
+
+/**
+ * Get a specific webhook log record.
+ *
+ * @param  int $logid
+ * @return object|false
+ */
+function local_webhooks_get_log($logid) {
+    global $DB;
+
+    $sql = "SELECT l.*, s.title as servicetitle 
+            FROM {local_webhooks_log} l 
+            LEFT JOIN {local_webhooks_service} s ON l.serviceid = s.id 
+            WHERE l.id = ?";
+    
+    return $DB->get_record_sql($sql, array($logid));
 }

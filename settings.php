@@ -25,8 +25,20 @@
 defined("MOODLE_INTERNAL") || die();
 
 if ($hassiteconfig) {
-    $ADMIN->add("server", new admin_externalpage("local_webhooks",
-        new lang_string("pluginname", "local_webhooks"),
-        new moodle_url("/local/webhooks/index.php")
+    // Create a category for webhooks
+    $webhookscategory = new admin_category('local_webhooks_category', 
+        new lang_string('pluginname', 'local_webhooks'));
+    $ADMIN->add('server', $webhookscategory);
+    
+    // Add webhooks management page
+    $ADMIN->add('local_webhooks_category', new admin_externalpage('local_webhooks',
+        new lang_string('pluginname', 'local_webhooks'),
+        new moodle_url('/local/webhooks/index.php')
+    ));
+    
+    // Add webhooks logs page
+    $ADMIN->add('local_webhooks_category', new admin_externalpage('local_webhooks_logs',
+        new lang_string('webhooklogs', 'local_webhooks'),
+        new moodle_url('/local/webhooks/logs.php')
     ));
 }
