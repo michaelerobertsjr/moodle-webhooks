@@ -1,6 +1,8 @@
 # Moodle WebHook's
 [![GitHub Release](https://img.shields.io/github/release/valentineus/moodle-webhooks.svg)](https://github.com/valentineus/moodle-webhooks/releases)
 
+This was forked so that I can add needed functionality to test and log the setup.
+
 Adding Webhooks to Moodle.
 The Webhooks feature allows applications to receive real-time notification of changes to certain data.
 
