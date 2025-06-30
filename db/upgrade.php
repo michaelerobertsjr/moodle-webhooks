@@ -48,5 +48,38 @@ function xmldb_local_webhooks_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2017112600, "local", "webhooks");
     }
 
+    /* Add webhook logs table */
+    if ($oldversion < 2024062900) {
+        $dbman = $DB->get_manager();
+
+        // Define table local_webhooks_log to be created.
+        $table = new xmldb_table('local_webhooks_log');
+
+        // Adding fields to table local_webhooks_log.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('serviceid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('eventname', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('url', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('requestbody', XMLDB_TYPE_TEXT, null, null, null, null, null);
+        $table->add_field('responsecode', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+        $table->add_field('responsebody', XMLDB_TYPE_TEXT, null, null, null, null, null);
+        $table->add_field('success', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('timesent', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+
+        // Adding keys to table local_webhooks_log.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+
+        // Adding indexes to table local_webhooks_log.
+        $table->add_index('serviceid', XMLDB_INDEX_NOTUNIQUE, array('serviceid'));
+        $table->add_index('timesent', XMLDB_INDEX_NOTUNIQUE, array('timesent'));
+
+        // Conditionally launch create table for local_webhooks_log.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        upgrade_plugin_savepoint(true, 2024062900, 'local', 'webhooks');
+    }
+
     return true;
 }

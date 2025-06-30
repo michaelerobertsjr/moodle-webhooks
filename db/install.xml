@@ -16,5 +16,25 @@
                 <KEY NAME="primary" TYPE="primary" FIELDS="id" />
             </KEYS>
         </TABLE>
+        <TABLE NAME="local_webhooks_log" COMMENT="A table for storing webhook request/response logs.">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
+                <FIELD NAME="serviceid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" />
+                <FIELD NAME="eventname" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" />
+                <FIELD NAME="url" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" />
+                <FIELD NAME="requestbody" TYPE="text" NOTNULL="false" SEQUENCE="false" />
+                <FIELD NAME="responsecode" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" />
+                <FIELD NAME="responsebody" TYPE="text" NOTNULL="false" SEQUENCE="false" />
+                <FIELD NAME="success" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" />
+                <FIELD NAME="timesent" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" />
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id" />
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="serviceid" UNIQUE="false" FIELDS="serviceid" />
+                <INDEX NAME="timesent" UNIQUE="false" FIELDS="timesent" />
+            </INDEXES>
+        </TABLE>
     </TABLES>
 </XMLDB>

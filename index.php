@@ -91,6 +91,10 @@ echo $OUTPUT->single_button($backupurl, new lang_string("backup", "moodle"), "ge
 $restorebackupurl = new moodle_url($restorebackup);
 echo $OUTPUT->single_button($restorebackupurl, new lang_string("restore", "moodle"));
 
+/* Adds a view logs button */
+$viewlogsurl = new moodle_url("/local/webhooks/logs.php");
+echo $OUTPUT->single_button($viewlogsurl, new lang_string("webhooklogs", "local_webhooks"));
+
 /* Displays the table */
 $table = new local_webhooks_table("local-webhooks-table");
 $table->define_baseurl($baseurl);
